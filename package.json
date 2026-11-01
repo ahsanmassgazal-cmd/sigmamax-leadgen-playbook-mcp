@@ -1,0 +1,24 @@
+{
+  "name": "sigmamax-leadgen-playbook-mcp",
+  "version": "1.0.0",
+  "description": "Free MCP server with 100 lead-generation agent prompts, workflows and a prompt builder. No customer data; drafts only.",
+  "type": "module",
+  "main": "src/server.js",
+  "bin": {
+    "sigmamax-leadgen-playbook-mcp": "src/stdio.js"
+  },
+  "files": ["src", "api", "vercel.json", "README.md", "LICENSE"],
+  "scripts": {
+    "start": "node src/stdio.js",
+    "dev": "node dev.js",
+    "test": "node --test \"test/*.test.js\""
+  },
+  "keywords": ["mcp", "model-context-protocol", "lead-generation", "sales", "outreach", "ai-agents", "prompts", "sigmamax"],
+  "author": "Sigma Max AI Solutions",
+  "license": "MIT",
+  "engines": { "node": ">=18" },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "zod": "^4.6.7"
+  }
+}
