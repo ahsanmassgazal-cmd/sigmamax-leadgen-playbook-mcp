@@ -1,6 +1,6 @@
 // Vercel serverless entry: stateless Streamable HTTP MCP endpoint (served at /mcp via vercel.json).
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
-import { createServer } from "../src/server.js";
+import { createServer } from "../src/mcp-server.js";
 
 function methodNotAllowed(res) {
   res.statusCode = 405;

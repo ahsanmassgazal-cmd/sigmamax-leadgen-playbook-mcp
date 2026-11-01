@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "Free MCP server with 100 lead-generation agent prompts, workflows and a prompt builder. No customer data; drafts only.",
   "type": "module",
-  "main": "src/server.js",
   "bin": {
     "sigmamax-leadgen-playbook-mcp": "src/stdio.js"
   },

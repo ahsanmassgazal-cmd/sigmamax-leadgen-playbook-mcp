@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
-import { createServer } from "../src/server.js";
+import { createServer } from "../src/mcp-server.js";
 import { startDevServer } from "../dev.js";
 
 async function connect() {
