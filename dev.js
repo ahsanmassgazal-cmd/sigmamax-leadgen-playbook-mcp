@@ -1,15 +1,11 @@
 // Local HTTP dev server: node dev.js  ->  http://localhost:3000/mcp
 import http from "node:http";
-import handler from "./api/mcp.js";
+import handler from "./index.js";
 
 export function startDevServer(port = 3000) {
   const server = http.createServer(async (req, res) => {
-    if (req.url !== "/mcp") {
-      res.statusCode = 404;
-      return res.end("Not found. Use /mcp");
-    }
     let body = "";
-    for await (const chunk of req) body += chunk;
+    if (req.method === "POST") for await (const chunk of req) body += chunk;
     try {
       req.body = body ? JSON.parse(body) : undefined;
     } catch {

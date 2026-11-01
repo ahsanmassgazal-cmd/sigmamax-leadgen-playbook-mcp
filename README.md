@@ -59,7 +59,7 @@ npm run dev     # http://localhost:3000/mcp
 npm start       # stdio server
 ```
 
-Server code is plain ESM JavaScript (no build step). The Vercel entry is `api/mcp.js` (stateless Streamable HTTP); the catalog lives in `src/agents.js`.
+Server code is plain ESM JavaScript (no build step). The Vercel entry is `index.js` (routes `/mcp` to `api/mcp.js`, stateless Streamable HTTP); the catalog lives in `src/agents.js`. Do not name any file `server.js` or `app.js`: Vercel treats those as app entrypoints.
 
 ## Design rules
 
