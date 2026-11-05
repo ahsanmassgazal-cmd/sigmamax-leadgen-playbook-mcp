@@ -1,5 +1,18 @@
-// The Lead Gen Playbook catalog: 100 agent prompt specs organised by funnel stage.
+// The Lead Gen Playbook catalog: 100 agent prompt specs organised by funnel stage and canonical department.
 // Each raw row: [id, name, goal, inputs ("|" separated), outputs ("|" separated)]
+
+export const DEPARTMENTS = [
+  { key: "market_research", label: "Market Research & Strategy", stages: ["targeting"] },
+  { key: "lead_sourcing", label: "Lead Sourcing & Prospecting", stages: ["prospecting"] },
+  { key: "signals_planning", label: "Signals & Account Planning", stages: ["signals"] },
+  { key: "data_hygiene", label: "Data Engineering & Enrichment", stages: ["enrichment"] },
+  { key: "copywriting", label: "Outbound Copywriting & Messaging", stages: ["copywriting"] },
+  { key: "campaigns_deliverability", label: "Campaigns & Mailbox Deliverability", stages: ["campaigns"] },
+  { key: "inbound_response", label: "Inbound Conversion & Response Desk", stages: ["replies"] },
+  { key: "sales_enablement", label: "Sales Enablement & Discovery", stages: ["sales-prep"] },
+  { key: "pipeline_nurture", label: "Pipeline Acceleration & Nurture", stages: ["nurture"] },
+  { key: "regional_compliance_revops", label: "Regional Compliance, Operations & Analytics", stages: ["messaging", "reengage-social", "ops-analytics"] }
+];
 
 export const STAGES = [
   { key: "targeting", label: "Targeting & Research", from: 1, to: 4, rules: "Be specific and decision-oriented. Separate facts from assumptions." },
@@ -18,14 +31,14 @@ export const STAGES = [
 
 const raw = [
   [1, "ICP Research Agent", "Define the ideal customer profile from what the business sells and who its best customers are.", "product or service description|best customers|target markets", "ICP summary|firmographic filters|exclusion criteria"],
-  [2, "Buyer Persona Agent", "Build buyer personas with roles, goals, objections and buying triggers.", "ICP|offer", "2-3 personas|top objections|trigger events"],
-  [3, "Target Account Research Agent", "Turn public information about a target account into a short, usable brief.", "company name|website or notes|ICP", "account summary|fit notes|open questions"],
-  [4, "Market Segmentation Agent", "Split a market into segments worth targeting and rank them.", "ICP|market notes", "segments|priority ranking|rationale"],
+  [2, "Persona Card Builder Agent", "Build buyer personas with roles, goals, objections, and buying triggers.", "ICP|offer", "2-3 personas|top objections|trigger events"],
+  [3, "Buying Committee & Account Mapping Agent", "Turn public information into an account brief and stakeholder committee map.", "company name|website or notes|ICP", "account summary|committee roles|open questions"],
+  [4, "Market Sizing & Segmentation Agent", "Calculate bottom-up market sizing, addressable accounts, and split market into ranked segments.", "ICP|market notes|territory", "TAM/SAM estimate|segments|priority ranking|rationale"],
   [5, "Prospect List Builder Agent", "Plan a repeatable way to build a prospect list for an ICP.", "ICP|geography|data sources available", "list-building plan|search queries|fields to capture"],
   [6, "Company Finder Agent", "Create search strategies to find companies that match an ICP.", "ICP|geography", "search queries|directories to check|exclusion rules"],
   [7, "Contact Finder Agent", "Plan which roles to look for at a company and where to find them legitimately.", "company|personas", "target roles|public sources to check|what to leave blank"],
-  [8, "Lead Qualification Agent", "Qualify a lead against stated criteria and explain the decision.", "lead information|qualification criteria", "qualified yes/no/maybe|reasons|missing information"],
-  [9, "Lead Scoring Agent", "Design a transparent scoring model and score leads with reasons.", "ICP|lead data", "scoring rubric|score per lead|reasons"],
+  [8, "BANT & MEDDICC Qualification Agent", "Qualify a lead against BANT and MEDDICC criteria and explain the decision.", "lead information|qualification criteria", "qualified yes/no/maybe|reasons|missing information"],
+  [9, "Disqualification Rules & Scoring Agent", "Design a transparent scoring model and enforce strict disqualification rules.", "ICP|lead data|regulatory constraints", "scoring rubric|disqualification triggers|score per lead|reasons"],
   [10, "Intent Signal Agent", "Identify buying-intent signals worth acting on.", "company notes|offer", "signals found|signal strength|suggested action"],
   [11, "Website Visitor Identification Agent", "Turn website visitor behavior into follow-up priorities while respecting consent.", "visitor activity summary|consent status", "priority list|suggested follow-up|privacy flags"],
   [12, "Job Change Trigger Agent", "Draft outreach angles for contacts who changed roles.", "contact change information|offer", "angle|timing|message draft"],
@@ -46,23 +59,23 @@ const raw = [
   [27, "Subject Line Agent", "Write subject lines in several styles.", "email body|audience", "5 subject lines|why each works|one to test first"],
   [28, "Personalization Agent", "Add relevant personalization grounded only in provided facts.", "prospect facts|draft", "personalized draft|facts used|facts missing"],
   [29, "First-Line Writer Agent", "Write an opening line grounded in a real fact.", "prospect facts", "3 first lines|fact used for each"],
-  [30, "Value Proposition Agent", "Write a clear value proposition for a segment.", "offer|segment", "value proposition|proof needed|variants"],
+  [30, "Pain-Point Library & Value Proposition Agent", "Map customer pain points with severity ratings to a clear value proposition.", "offer|segment|pain points", "value proposition|pain catalog|proof needed|variants"],
   [31, "Offer Angle Agent", "Find different angles to present the same offer.", "offer|persona", "5 angles|best for whom|risks"],
   [32, "Call-to-Action Agent", "Write low-friction calls to action.", "email draft|goal", "5 CTAs|friction rating|best pick"],
   [33, "Follow-Up Sequence Agent", "Write a follow-up sequence with sensible spacing.", "first email|goal|cadence", "follow-up emails|timing|stop rules"],
   [34, "Breakup Email Agent", "Write a polite final email to close a sequence.", "sequence so far", "breakup email|alternative version"],
-  [35, "LinkedIn DM Writer Agent", "Write a short direct message draft for manual sending.", "prospect facts|offer", "DM draft|alternative version|follow-up"],
+  [35, "Channel Comparison & Selection Agent", "Compare response rates, touchpoint friction, and appropriateness across Email, LinkedIn, and WhatsApp.", "prospect facts|offer|territory", "channel comparison|recommended primary channel|fallback channel"],
   [36, "Connection Request Writer Agent", "Write a short connection note within platform limits.", "prospect facts", "3 notes|character counts"],
   [37, "Voice Note Script Agent", "Write a short voice-note script.", "prospect facts|offer", "30-second script|opening line|call to action"],
-  [38, "Outbound Campaign Planner Agent", "Plan an outbound campaign end to end.", "ICP|offer|channels|capacity", "campaign plan|timeline|success metrics"],
-  [39, "Multichannel Sequencing Agent", "Combine email, LinkedIn and WhatsApp into one respectful sequence.", "channels allowed|persona", "multichannel sequence|day-by-day schedule|stop rules"],
+  [38, "Deliverability & DNS Checklist Agent", "Audit domain SPF, DKIM, DMARC, and mailbox protection guardrails.", "sending setup|volume|content|DNS records", "DNS checklist|risk list|mailbox warmup schedule"],
+  [39, "WhatsApp Business Outreach Agent", "Draft compliant WhatsApp Business messages with explicit opt-in, template parameters, and zero-spam tone.", "opt-in status|prospect context|offer", "WhatsApp message draft|template parameters|opt-out instruction"],
   [40, "Send-Time Optimization Agent", "Suggest send windows from audience time zones and past results.", "audience time zones|past results", "send windows|test plan"],
   [41, "A/B Testing Agent", "Design an A/B test that changes one variable.", "goal|current copy", "hypothesis|variants|sample-size note"],
   [42, "Deliverability Audit Agent", "Audit email setup and practices for deliverability risks.", "sending setup|volume|content", "risk list|fixes|checklist"],
   [43, "Inbox Warm-Up Agent", "Plan a gradual sending ramp-up.", "domain age|target volume", "ramp schedule|guardrails"],
   [44, "Domain Reputation Agent", "Interpret domain reputation signals and recommend next steps.", "domain checks|bounce data", "reputation view|actions"],
   [45, "Spam Check Agent", "Review a draft for spam-trigger risk.", "email draft", "risk flags|safer rewrite"],
-  [46, "Reply Categorization Agent", "Categorize a reply as positive, question, objection, not now, not interested, unsubscribe, out-of-office or bounce.", "reply text", "category|confidence|next action"],
+  [46, "Reply Classifier Agent", "Categorize a reply as positive, question, objection, not now, not interested, unsubscribe, out-of-office or bounce.", "reply text", "category|confidence|next action"],
   [47, "Positive Reply Handler Agent", "Draft a response to a positive reply.", "reply|context", "reply draft|proposed next step"],
   [48, "Objection Handling Agent", "Draft respectful responses to common objections without pressure.", "objection|offer", "response draft|alternative tone|when to stop"],
   [49, "Meeting Booking Agent", "Draft meeting-booking messages.", "reply|availability", "booking message|alternative slots"],
@@ -73,11 +86,11 @@ const raw = [
   [54, "Lead Handoff Agent", "Write a clean handoff from prospecting to sales.", "lead history", "handoff note|open questions"],
   [55, "SDR Script Agent", "Write a call script with branches.", "persona|offer", "script|branches|objection lines"],
   [56, "Call Opening Agent", "Write a short, permission-based call opening.", "persona|reason for call", "3 openings"],
-  [57, "Qualification Question Agent", "List qualification questions.", "offer|criteria", "questions by topic|red flags"],
+  [57, "BANT & MEDDICC Question Builder Agent", "List structured BANT (Budget, Authority, Need, Timeline) and MEDDICC qualification questions.", "offer|criteria", "BANT questions|MEDDICC questions|red flags"],
   [58, "Needs Analysis Agent", "Structure a needs analysis from call notes.", "call notes", "needs summary|gaps|next questions"],
-  [59, "Pain Point Mapping Agent", "Map customer pains to the offer.", "notes|offer", "pain map|evidence|priority"],
+  [59, "Pain-Point Library Agent", "Map customer pains with severity ratings to the offer.", "notes|offer", "pain map|severity ratings|evidence required"],
   [60, "Decision Maker Mapper Agent", "Map who decides, who influences and who can block.", "organization information|notes", "role map|unknowns|next step"],
-  [61, "Buying Committee Agent", "Map a buying committee and how to engage each member.", "account notes", "committee map|engagement plan"],
+  [61, "Buying Committee Mapping Agent", "Map a buying committee and how to engage each member.", "account notes", "committee map|role coverage gaps|engagement plan"],
   [62, "Account Mapping Agent", "Map an account's structure and entry points.", "account notes", "entry points|account plan"],
   [63, "Trigger-Based Outreach Agent", "Write outreach prompted by a specific event.", "trigger|offer", "message draft|timing"],
   [64, "Reactivation Agent", "Re-open dormant conversations.", "history", "reactivation message|angle"],
@@ -95,10 +108,10 @@ const raw = [
   [76, "Social Proof Agent", "Use proof truthfully and effectively.", "proof assets|prospect", "proof lines|where to place them"],
   [77, "ROI Messaging Agent", "Frame ROI honestly.", "offer|customer numbers", "ROI framing|assumptions|caveats"],
   [78, "Industry Personalization Agent", "Adapt messaging to an industry.", "industry|offer", "industry-specific messaging|jargon to use|proof needed"],
-  [79, "Region Localization Agent", "Adapt tone and norms for a region.", "region|message", "localized version|cultural notes"],
-  [80, "Multilingual Outreach Agent", "Write outreach in another language and flag it for native review.", "message|language|region", "translation|review flags"],
-  [81, "Compliance Check Agent", "Review outreach for compliance risks. This is not legal advice.", "draft|country|channel", "risk flags|suggested edits|questions for counsel"],
-  [82, "CRM Note Writer Agent", "Write clean, useful CRM notes.", "interaction summary", "CRM note|next step|date"],
+  [79, "GCC Regional & Cultural Planning Agent", "Adapt scheduling and messaging for GCC working weeks (Sun-Thu), Friday prayer times, Ramadan hours, and Eid cycles.", "target territory|campaign dates", "localized calendar schedule|cultural tone guidance|blackout windows"],
+  [80, "Multilingual GCC Outreach Agent", "Draft outreach copy in English, Arabic, Hindi, or Urdu, including respectful bilingual Arabic/English variants.", "message|language (en, ar, hi, ur)|region", "localized translation|bilingual draft|cultural review flags"],
+  [81, "GCC PDPL & Statutory Compliance Agent", "Review outreach and data processing against UAE Federal Decree-Law 45/2021, Saudi PDPL, and Oman Royal Decree 6/2022.", "draft|target country (AE, SA, OM)|channel", "statutory risk flags|PDPL compliance checklist|suggested edits"],
+  [82, "Knowledge Base Writer Agent", "Write clean, approved knowledge entries, compliance guidelines, and operational SOPs.", "operational directives|regulatory notes", "knowledge base entry|summary|audit metadata"],
   [83, "Pipeline Update Agent", "Recommend a pipeline stage and next action.", "interaction|stage definitions", "stage recommendation|next action"],
   [84, "Lead Status Prediction Agent", "Estimate likelihood from history, with caveats.", "history|outcomes", "likelihood band|drivers|caveats"],
   [85, "Churned Prospect Recovery Agent", "Recover prospects who went quiet.", "history", "recovery message|when to stop"],
@@ -111,7 +124,7 @@ const raw = [
   [92, "Prospect Research Brief Agent", "Write a one-page prospect brief from collected facts.", "collected facts", "brief|sources|unknowns"],
   [93, "Daily Prospecting Dashboard Agent", "Turn pipeline data into a daily plan.", "pipeline data", "today's priorities|counts"],
   [94, "KPI Tracking Agent", "Define and summarize outbound KPIs.", "goals|data", "KPI set|weekly summary"],
-  [95, "Outreach Performance Analyst Agent", "Analyze outreach results and find what to change.", "results", "findings|recommendations"],
+  [95, "Attribution Review & Multi-Touch Analyst Agent", "Analyze multi-touch attribution (first-touch, last-touch, linear) and channel revenue yield.", "touchpoint records|pipeline outcomes", "channel attribution report|ROI per channel|recommendations"],
   [96, "Sales Feedback Loop Agent", "Turn sales feedback into improvements.", "feedback", "changes to ICP, copy and process"],
   [97, "Appointment Setting Agent", "Plan and draft end-to-end appointment setting.", "leads|calendar rules", "booking plan|messages"],
   [98, "CRM Hygiene Agent", "Keep the CRM clean.", "rules|sample records", "hygiene checklist|weekly routine"],
@@ -127,47 +140,84 @@ function stageOf(id) {
   return STAGES.find((s) => id >= s.from && id <= s.to);
 }
 
+function departmentOf(stageKey) {
+  return DEPARTMENTS.find((d) => d.stages.includes(stageKey)) || DEPARTMENTS[0];
+}
+
 export const AGENTS = raw.map(([id, name, goal, inputs, outputs]) => {
   const stage = stageOf(id);
+  const dept = departmentOf(stage.key);
   const inputList = inputs.split("|");
   const outputList = outputs.split("|");
   const tags = Array.from(
-    new Set([stage.key, ...slug(name).split("-"), ...inputList.join(" ").toLowerCase().split(/[^a-z]+/)].filter((t) => t.length > 3)),
+    new Set([stage.key, dept.key, ...slug(name).split("-"), ...inputList.join(" ").toLowerCase().split(/[^a-z]+/)].filter((t) => t.length > 3)),
   );
-  return { id, slug: slug(name), name, stage: stage.key, stageLabel: stage.label, goal, inputs: inputList, outputs: outputList, tags };
+  return {
+    id,
+    slug: slug(name),
+    name,
+    stage: stage.key,
+    stageLabel: stage.label,
+    department: dept.key,
+    departmentLabel: dept.label,
+    goal,
+    inputs: inputList,
+    outputs: outputList,
+    tags
+  };
 });
 
 export const WORKFLOWS = {
   "zero-to-first-outreach": {
-    title: "From zero to your first outreach",
-    description: "Define who to target, build a small list, qualify it, and write the first safe messages.",
-    agents: [1, 2, 5, 6, 7, 8, 9, 26, 28, 32, 45, 81],
+    title: "Zero to First Outreach",
+    description: "Go from what you sell to your first personalized cold-email batch.",
+    agents: [1, 2, 5, 26, 27, 45],
   },
   "email-sequence": {
-    title: "Write a complete email sequence",
-    description: "First email, subject lines, follow-ups and a polite close, checked for spam risk and compliance.",
-    agents: [26, 27, 29, 30, 33, 34, 45, 81],
+    title: "Cold Email Sequence",
+    description: "Create an end-to-end sequence with hooks, value props, follow-ups and spam-safe phrasing.",
+    agents: [26, 27, 28, 30, 33, 45],
+  },
+  "signal-to-sequence": {
+    title: "Signal to Sequence",
+    description: "Turn an intent or hiring signal into an angle and a 3-touch sequence.",
+    agents: [10, 13, 28, 30, 33, 45],
   },
   "reply-desk": {
-    title: "Handle replies",
-    description: "Sort replies, draft answers, book meetings and keep the CRM tidy.",
-    agents: [46, 47, 48, 49, 82, 83],
+    title: "Reply Desk",
+    description: "Classify incoming replies, handle objections, and book calls.",
+    agents: [46, 47, 48, 49, 50],
   },
   "linkedin-warm-outreach": {
-    title: "Warm LinkedIn outreach (manual sending)",
-    description: "Research a prospect from a pasted profile and draft a connection note and message.",
-    agents: [3, 22, 28, 35, 36],
+    title: "LinkedIn Warm Outreach",
+    description: "Prospect, connect and start conversations on LinkedIn respectfully without automation spam.",
+    agents: [22, 36, 35, 89, 90],
   },
   "list-quality": {
-    title: "Clean and segment a list",
-    description: "Verify, enrich, de-duplicate and segment a prospect list.",
-    agents: [19, 20, 21, 24, 25, 98],
+    title: "List Quality & Deduplication",
+    description: "Clean, deduplicate, verify emails, and enrich account records before launching campaigns.",
+    agents: [19, 20, 23, 24, 25],
+  },
+  "lost-lead-revival": {
+    title: "Lost Lead Revival",
+    description: "Re-engage cold or closed-lost leads with a new angle.",
+    agents: [64, 65, 86, 45],
   },
   "weekly-review": {
-    title: "Weekly review",
-    description: "Plan the week, track KPIs, analyze results and feed learning back.",
-    agents: [93, 94, 95, 96, 100],
+    title: "Weekly Outbound Performance Review",
+    description: "Audit deliverability, track KPIs, evaluate channel attribution and optimize reply rates.",
+    agents: [42, 94, 95, 96, 100],
   },
+  "gcc-enterprise-outreach": {
+    title: "GCC Enterprise Outreach (English & Arabic)",
+    description: "Design compliant, respectful B2B outreach tailored for UAE, Saudi Arabia, and Oman business protocols.",
+    agents: [1, 3, 35, 39, 79, 80, 81],
+  },
+  "buying-committee-penetration": {
+    title: "Buying Committee Penetration",
+    description: "Map all decision makers, evaluators, and champions to navigate multi-stakeholder corporate procurement.",
+    agents: [3, 8, 57, 60, 61, 53],
+  }
 };
 
 export function getAgent(ref) {
@@ -207,6 +257,8 @@ export function recommend(goal, limit = 8) {
     [/(linkedin|social|connection)/, "linkedin-warm-outreach"],
     [/(list|clean|dedupe|duplicate|verify|enrich|crm)/, "list-quality"],
     [/(report|kpi|review|analytics|weekly|measure)/, "weekly-review"],
+    [/(gcc|uae|saudi|oman|arabic|whatsapp)/, "gcc-enterprise-outreach"],
+    [/(committee|stakeholder|procurement|decision)/, "buying-committee-penetration"],
   ];
   for (const [re, wf] of rules) if (re.test(g)) picks.push(wf);
   const ids = [];

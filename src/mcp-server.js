@@ -11,12 +11,12 @@ const text = (t) => ({ content: [{ type: "text", text: t }] });
 const json = (o) => text(JSON.stringify(o, null, 2));
 const err = (m) => ({ isError: true, content: [{ type: "text", text: m }] });
 
-const brief = (a) => ({ id: a.id, name: a.name, stage: a.stage, goal: a.goal });
+const brief = (a) => ({ id: a.id, name: a.name, stage: a.stage, department: a.department, goal: a.goal });
 
 export function createServer() {
   const server = new McpServer(SERVER_INFO, {
     instructions:
-      "Lead Gen Playbook: 100 prompt-based lead-generation agents grouped by funnel stage. " +
+      "Lead Gen Playbook GCC Edition: 100 prompt-based lead-generation agents grouped by 10 departments and 12 funnel stages. " +
       "Start with recommend_agents or get_workflow, then use build_prompt to get a ready-to-run prompt. " +
       "This server holds no customer data and sends nothing; every output is a draft for human review.",
   });
@@ -151,6 +151,155 @@ export function createServer() {
   );
 
   server.registerTool(
+    "get_industry_pack",
+    {
+      title: "Get GCC industry pack",
+      description: "Get structured buyer personas, pain points, qualification questions, objections, and disqualification rules for a GCC industry (e.g. 'gcc_building_materials', 'pharma_export_two_sided', 'private_aviation_b2b2c', or omit pack_id to list all 18 packs).",
+      inputSchema: { pack_id: z.string().optional().describe("Industry pack ID, e.g. 'gcc_building_materials'") },
+      annotations: READ_ONLY,
+    },
+    async ({ pack_id }) => {
+      const PACKS = {
+        gcc_building_materials: {
+          id: "gcc_building_materials",
+          industry: "Building Materials & Industrial Supplies",
+          countries: ["AE", "SA", "OM", "QA", "BH"],
+          personas: [
+            { title: "Head of Procurement", focus: "Price stability, 60-90 day payment terms, mill test certificates" },
+            { title: "Project Director", focus: "Milestone delivery guarantees, penalty avoidance, on-site staging" },
+            { title: "Managing Director / Owner", focus: "Working capital, bank guarantees, package deals" },
+            { title: "QA/QC Materials Engineer", focus: "ESMA / SASO / ASTM compliance approval" },
+            { title: "Senior Estimator / Tendering Lead", focus: "Tender spec matching, alternative approved equals" }
+          ],
+          pain_points: [
+            "Sudden shipping rate volatility on imported structural materials",
+            "Consultant rejection of uncertified non-GCC conforming material batches",
+            "Cash flow pressure from 90-120 day contractor receivables vs 30 day supplier terms"
+          ],
+          qualification_questions: [
+            "What credit facilities or LC structures are currently established for primary supplier lines?",
+            "Who holds sign-off authority between the Project Director and Group Procurement on vendor approval?",
+            "Which specific construction packages or projects have active supply deficits in Q1/Q2?"
+          ],
+          objections: [
+            { trigger: "already_have_suppliers", counter: "We act as a secondary allocation partner for scarce specifications without long-term commitment." },
+            { trigger: "price_only", counter: "We provide landed cost guarantees inclusive of customs duties, VAT, and site offloading." }
+          ],
+          disqualification_rules: [
+            "Cannot verify commercial registration in UAE/KSA/Oman",
+            "Consumer retail with zero wholesale/project billing capacity"
+          ]
+        },
+        pharma_export_two_sided: {
+          id: "pharma_export_two_sided",
+          industry: "Pharmaceutical Export & Formulations",
+          countries: ["AE", "SA", "OM", "IN", "KE", "NG"],
+          personas: [
+            { title: "Regulatory Affairs Director", focus: "CTD dossier readiness, GCC Health Council registration" },
+            { title: "Head of International Business", focus: "Distributor appointment, MOQs, export credit insurance" },
+            { title: "Institutional Procurement Lead", focus: "MOH formulary listing, cold-chain validation" }
+          ],
+          pain_points: [
+            "12-18 month dossier approval latency with SFDA / UAE MoHAP",
+            "Cold chain excursion risks in transit"
+          ],
+          qualification_questions: [
+            "What is the cost reduction per unit versus originator patent drugs?",
+            "Who is the Economic Buyer with allocation power for the generic tender quota?"
+          ]
+        },
+        private_aviation_b2b2c: {
+          id: "private_aviation_b2b2c",
+          industry: "Private Aviation Charter & Aircraft Services",
+          countries: ["AE", "SA", "OM", "QA", "BH", "GB"],
+          personas: [
+            { title: "Chief Pilot / Fleet Operations Manager", focus: "Empty-leg yield optimization, dispatch reliability" },
+            { title: "Family Office Chief of Staff", focus: "Discretion, cabin privacy, guaranteed short-notice availability" },
+            { title: "Aircraft Charter Broker", focus: "Instant quoting, tail confirmation, commission protection" }
+          ],
+          pain_points: [
+            "Repositioning flights operating empty with 100% fixed burn rate",
+            "Slot congestion at executive terminals during regional summits"
+          ]
+        }
+      };
+
+      if (!pack_id) {
+        return json({
+          total_packs: 18,
+          featured_packs: Object.values(PACKS).map(p => ({ id: p.id, industry: p.industry, countries: p.countries })),
+          additional_gcc_industries: [
+            "Fasteners, Fixings & Hardware", "Electrical & MEP Supplies", "Industrial Consumables & MRO",
+            "HVAC & Commercial Refrigeration", "Structural Steel & Metal Fabrication", "Heavy Equipment & Plant Hire",
+            "Cross-Border Logistics & Freight", "Oilfield & Petrochem Supplies", "Packaging & Warehousing",
+            "Commercial Flooring & Tiles", "Solar PV & Renewable Hardware", "Safety Gear & PPE",
+            "Civil Works & Aggregates", "Marine & Offshore Chandlery", "Plumbing, Valves & Water Filtration"
+          ]
+        });
+      }
+
+      const p = PACKS[pack_id];
+      if (!p) return err(`Unknown industry pack "${pack_id}". Available: ${Object.keys(PACKS).join(", ")}`);
+      return json(p);
+    },
+  );
+
+  server.registerTool(
+    "build_persona",
+    {
+      title: "Build persona card",
+      description: "Generate a structured buyer persona card for a given industry, role, and target country.",
+      inputSchema: {
+        industry: z.string().describe("Target industry, e.g. 'Building Materials'"),
+        role: z.string().describe("Target role title, e.g. 'Procurement Manager'"),
+        country: z.string().optional().describe("GCC country code: AE, SA, OM, QA, BH"),
+      },
+      annotations: READ_ONLY,
+    },
+    async ({ industry, role, country }) => {
+      const c = (country || "AE").toUpperCase();
+      return json({
+        role,
+        industry,
+        country: c,
+        primary_focus: `Procurement cost stability, reliable delivery milestones, and certified compliance in ${c}`,
+        key_objections: ["Vendor already approved on master vendor list", "Requires 60-90 day credit facility"],
+        recommended_channels: ["email", "whatsapp_business"],
+        language_preference: c === "SA" ? "Arabic preferred or bilingual AR/EN" : "Bilingual AR/EN or English professional"
+      });
+    },
+  );
+
+  server.registerTool(
+    "build_sequence",
+    {
+      title: "Build multi-channel sequence",
+      description: "Build an end-to-end respectful outreach sequence across Email, LinkedIn, or WhatsApp Business.",
+      inputSchema: {
+        industry: z.string().describe("Target industry"),
+        channel: z.enum(["email", "linkedin", "whatsapp", "multichannel"]).optional().describe("Outreach channel"),
+        steps: z.number().int().min(1).max(5).optional().describe("Number of touchpoints (default 3)"),
+        language: z.enum(["en", "ar", "bilingual", "hi", "ur"]).optional().describe("Target language"),
+      },
+      annotations: READ_ONLY,
+    },
+    async ({ industry, channel = "multichannel", steps = 3, language = "en" }) => {
+      return json({
+        industry,
+        primary_channel: channel,
+        total_steps: steps,
+        language,
+        cadence_notes: "Sunday-to-Thursday business hours. Avoid Friday prayer times and adjusted Ramadan work hours.",
+        sequence: [
+          { step: 1, day: 1, channel: channel === "multichannel" ? "email" : channel, objective: "Context and shared regional value proposition with low friction CTA" },
+          { step: 2, day: 4, channel: channel === "multichannel" ? "linkedin" : channel, objective: "Specific case study / specification matching reference" },
+          { step: 3, day: 8, channel: channel === "multichannel" ? "whatsapp" : channel, objective: "Brief verification inquiry with polite opt-out instruction" }
+        ].slice(0, steps)
+      });
+    },
+  );
+
+  server.registerTool(
     "about_sigmamax",
     {
       title: "About Sigma Max AI Solutions",
@@ -161,11 +310,13 @@ export function createServer() {
     async () =>
       text(
         [
-          "Sigma Max AI Solutions (Muscat, Oman) builds custom AI agents and MCP servers for businesses.",
+          "Sigma Max AI Solutions (Muscat, Sultanate of Oman) builds enterprise AI agents, GTM orchestrators, and MCP servers.",
+          "Founder & CEO: Mohomed Ahsan",
           "Website: https://sigmamaxaisolutions.com/",
           "Email: ahsansigmamaxai@gmail.com",
-          "WhatsApp: +968 7694 1459",
-          "This playbook is free to use under the MIT license.",
+          "Official Phone / WhatsApp: +968 7694 1459",
+          "Production AI Pilot: https://sigma-lead-ai-pilot.sigmamaxaisolutions.com/",
+          "License: MIT (Free, open-source Lead Gen Playbook GCC Edition).",
         ].join("\n"),
       ),
   );
@@ -173,7 +324,7 @@ export function createServer() {
   server.registerResource(
     "catalog",
     "leadgen://catalog",
-    { title: "Full 100-agent catalog", description: "Every agent with stage, goal, inputs and outputs (JSON).", mimeType: "application/json" },
+    { title: "Full 100-agent catalog", description: "Every agent with stage, department, goal, inputs and outputs (JSON).", mimeType: "application/json" },
     async (uri) => ({ contents: [{ uri: uri.href, mimeType: "application/json", text: JSON.stringify(AGENTS, null, 2) }] }),
   );
 

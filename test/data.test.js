@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { AGENTS, STAGES, WORKFLOWS, getAgent, searchAgents, recommend } from "../src/agents.js";
 import { buildPrompt } from "../src/prompts.js";
 
@@ -61,7 +62,8 @@ function walk(dir, out = []) {
 }
 
 test("no Indian phone number or secrets in the repo", () => {
-  for (const f of walk(new URL("..", import.meta.url).pathname)) {
+  const rootDir = fileURLToPath(new URL("..", import.meta.url));
+  for (const f of walk(rootDir)) {
     if (f.includes("package-lock") || f.endsWith("data.test.js")) continue;
     const t = readFileSync(f, "utf8");
     assert.ok(!/\+?91[\s-]?91722/.test(t), `Indian number in ${f}`);

@@ -19,7 +19,19 @@ const textOf = (r) => r.content[0].text;
 test("lists all tools, resource and prompt", async () => {
   const c = await connect();
   const tools = (await c.listTools()).tools.map((t) => t.name).sort();
-  assert.deepEqual(tools, ["about_sigmamax", "build_prompt", "get_agent", "get_workflow", "list_agents", "list_stages", "recommend_agents", "search_agents"]);
+  assert.deepEqual(tools, [
+    "about_sigmamax",
+    "build_persona",
+    "build_prompt",
+    "build_sequence",
+    "get_agent",
+    "get_industry_pack",
+    "get_workflow",
+    "list_agents",
+    "list_stages",
+    "recommend_agents",
+    "search_agents",
+  ]);
   assert.equal((await c.listResources()).resources[0].uri, "leadgen://catalog");
   assert.equal((await c.listPrompts()).prompts[0].name, "start_lead_gen");
 });
@@ -65,6 +77,20 @@ test("about_sigmamax shows the Oman contact only", async () => {
   assert.doesNotMatch(t, /\+91/);
 });
 
+test("gcc edition tools: get_industry_pack, build_persona, build_sequence", async () => {
+  const c = await connect();
+  const pack = JSON.parse(textOf(await c.callTool({ name: "get_industry_pack", arguments: { pack_id: "gcc_building_materials" } })));
+  assert.equal(pack.industry, "Building Materials & Industrial Supplies");
+  assert.ok(pack.countries.includes("AE"));
+
+  const persona = JSON.parse(textOf(await c.callTool({ name: "build_persona", arguments: { industry: "Building Materials", role: "Procurement Manager", country: "AE" } })));
+  assert.equal(persona.role, "Procurement Manager");
+  assert.equal(persona.country, "AE");
+
+  const seq = JSON.parse(textOf(await c.callTool({ name: "build_sequence", arguments: { industry: "Industrial Supplies", steps: 3 } })));
+  assert.equal(seq.sequence.length, 3);
+});
+
 test("real HTTP endpoint works with the Streamable HTTP client", async () => {
   const srv = await startDevServer(0);
   const port = srv.address().port;
@@ -72,7 +98,7 @@ test("real HTTP endpoint works with the Streamable HTTP client", async () => {
     const client = new Client({ name: "http-test", version: "1.0.0" });
     await client.connect(new StreamableHTTPClientTransport(new URL(`http://localhost:${port}/mcp`)));
     const tools = await client.listTools();
-    assert.equal(tools.tools.length, 8);
+    assert.equal(tools.tools.length, 11);
     const r = await client.callTool({ name: "get_agent", arguments: { agent: "100" } });
     assert.match(textOf(r), /Lead Generation Manager Agent/);
     await client.close();
