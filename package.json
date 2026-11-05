@@ -6,7 +6,7 @@
   "bin": {
     "sigmamax-leadgen-playbook-mcp": "src/stdio.js"
   },
-  "files": ["src", "api", "vercel.json", "README.md", "LICENSE"],
+  "files": ["src", "api", "public", "vercel.json", "README.md", "LICENSE"],
   "scripts": {
     "start": "node src/stdio.js",
     "dev": "node dev.js",
