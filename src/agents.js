@@ -2,16 +2,16 @@
 // Each raw row: [id, name, goal, inputs ("|" separated), outputs ("|" separated)]
 
 export const DEPARTMENTS = [
-  { key: "market_research", label: "Market Research & Strategy", stages: ["targeting"] },
-  { key: "lead_sourcing", label: "Lead Sourcing & Prospecting", stages: ["prospecting"] },
-  { key: "signals_planning", label: "Signals & Account Planning", stages: ["signals"] },
-  { key: "data_hygiene", label: "Data Engineering & Enrichment", stages: ["enrichment"] },
-  { key: "copywriting", label: "Outbound Copywriting & Messaging", stages: ["copywriting"] },
-  { key: "campaigns_deliverability", label: "Campaigns & Mailbox Deliverability", stages: ["campaigns"] },
-  { key: "inbound_response", label: "Inbound Conversion & Response Desk", stages: ["replies"] },
-  { key: "sales_enablement", label: "Sales Enablement & Discovery", stages: ["sales-prep"] },
-  { key: "pipeline_nurture", label: "Pipeline Acceleration & Nurture", stages: ["nurture"] },
-  { key: "regional_compliance_revops", label: "Regional Compliance, Operations & Analytics", stages: ["messaging", "reengage-social", "ops-analytics"] }
+  { key: "strategy_and_icp", label: "Strategy and ICP", agentIds: [1, 2, 17, 18] },
+  { key: "market_research_and_sizing", label: "Market Research and Sizing", agentIds: [4, 10, 11, 12, 13, 14, 15, 16] },
+  { key: "prospecting_and_data_sourcing", label: "Prospecting and Data Sourcing", agentIds: [5, 6, 7, 88, 89, 90, 91, 99] },
+  { key: "enrichment_and_verification", label: "Enrichment and Verification", agentIds: [19, 20, 21, 22, 23, 24, 25] },
+  { key: "qualification_and_buying_committees", label: "Qualification and Buying Committees", agentIds: [3, 8, 9, 57, 60, 61, 62, 71, 87] },
+  { key: "copywriting_and_personalization", label: "Copywriting and Personalization", agentIds: [26, 27, 28, 29, 30, 31, 32, 33, 34, 36, 37, 76, 77, 78, 80] },
+  { key: "campaign_and_channel_operations", label: "Campaign and Channel Operations", agentIds: [35, 39, 40, 41, 79] },
+  { key: "replies_and_nurture", label: "Replies and Nurture", agentIds: [46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 58, 59, 63, 64, 65, 66, 67, 68, 69, 70, 72, 73, 74, 75, 85, 86, 97] },
+  { key: "compliance_and_deliverability", label: "Compliance and Deliverability", agentIds: [38, 42, 43, 44, 45, 81, 82] },
+  { key: "analytics_and_revenue_intelligence", label: "Analytics and Revenue Intelligence", agentIds: [83, 84, 92, 93, 94, 95, 96, 98, 100] }
 ];
 
 export const STAGES = [
@@ -140,13 +140,13 @@ function stageOf(id) {
   return STAGES.find((s) => id >= s.from && id <= s.to);
 }
 
-function departmentOf(stageKey) {
-  return DEPARTMENTS.find((d) => d.stages.includes(stageKey)) || DEPARTMENTS[0];
+function departmentOf(id) {
+  return DEPARTMENTS.find((d) => d.agentIds.includes(id)) || DEPARTMENTS[0];
 }
 
 export const AGENTS = raw.map(([id, name, goal, inputs, outputs]) => {
   const stage = stageOf(id);
-  const dept = departmentOf(stage.key);
+  const dept = departmentOf(id);
   const inputList = inputs.split("|");
   const outputList = outputs.split("|");
   const tags = Array.from(

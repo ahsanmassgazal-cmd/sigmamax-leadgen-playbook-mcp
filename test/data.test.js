@@ -3,12 +3,40 @@ import assert from "node:assert/strict";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { AGENTS, STAGES, WORKFLOWS, getAgent, searchAgents, recommend } from "../src/agents.js";
+import { AGENTS, DEPARTMENTS, STAGES, WORKFLOWS, getAgent, searchAgents, recommend } from "../src/agents.js";
 import { buildPrompt } from "../src/prompts.js";
 
 test("catalog has exactly 100 agents with ids 1..100", () => {
   assert.equal(AGENTS.length, 100);
   assert.deepEqual(AGENTS.map((a) => a.id), Array.from({ length: 100 }, (_, i) => i + 1));
+});
+
+test("exactly 10 canonical departments covering all 100 agents without duplicates or omissions", () => {
+  assert.equal(DEPARTMENTS.length, 10);
+  const requiredLabels = [
+    "Strategy and ICP",
+    "Market Research and Sizing",
+    "Prospecting and Data Sourcing",
+    "Enrichment and Verification",
+    "Qualification and Buying Committees",
+    "Copywriting and Personalization",
+    "Campaign and Channel Operations",
+    "Replies and Nurture",
+    "Compliance and Deliverability",
+    "Analytics and Revenue Intelligence"
+  ];
+  assert.deepEqual(DEPARTMENTS.map((d) => d.label), requiredLabels);
+
+  // Verify all 100 agents mapped
+  const allDeptAgentIds = DEPARTMENTS.flatMap((d) => d.agentIds);
+  assert.equal(allDeptAgentIds.length, 100, "Every agent must be mapped to exactly one department");
+  assert.equal(new Set(allDeptAgentIds).size, 100, "No duplicate agent IDs across departments");
+
+  // Verify every agent in AGENTS has valid canonical department
+  for (const a of AGENTS) {
+    assert.ok(requiredLabels.includes(a.departmentLabel), `Invalid department for agent #${a.id}: ${a.departmentLabel}`);
+    assert.ok(DEPARTMENTS.some((d) => d.key === a.department), `Invalid department key for agent #${a.id}: ${a.department}`);
+  }
 });
 
 test("slugs are unique and every agent has goal, inputs and outputs", () => {
